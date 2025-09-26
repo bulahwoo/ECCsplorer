@@ -223,9 +223,9 @@ def rmanhattan_plot():
                 
                 print(
                 ggplot(coverage.data.tmp, aes(x=poscum)) +
-                geom_point(y=-coverage.data.tmp[,5], alpha=0.8, size=0.5, color="grey") +
+                geom_point(aes(y=-coverage.data.tmp[,5]), alpha=0.8, size=0.5, color="grey") +
                 geom_point(aes(y=coverage.data.tmp[,4], color=as.factor(chr)), alpha=1.0, size=0.5) +
-                geom_point(y=coverage.data.tmp$hiconf_map.all, alpha=0.8, size=0.5, color="red") +
+                geom_point(aes(y=hiconf_map.all), alpha=0.8, size=0.5, color="red") +
                 
                 scale_color_manual(values = rep(chr.colors, chr.number )) +
                 scale_x_continuous(label=axis.label$chr, breaks = axis.label$center) +

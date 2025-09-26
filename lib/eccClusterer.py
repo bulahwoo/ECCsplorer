@@ -29,7 +29,7 @@ class eccClusterer:
                                           out_=self.dir_res,
                                           tax_=config.REPEX_TAX[self.taxon],
                                           cpu_=config.CPU,
-                                          in_=self.seq_file)
+                                          in_=self.seq_file, logfile_=os.path.join(self.dir_res, "repex_log.txt"), maxmem_=300000000)
 
             create_idx = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE, universal_newlines=True)
 

@@ -204,7 +204,7 @@ REPEX_CMD = '{path_} ' \
             '--taxon {tax_} ' \
             '--cpu {cpu_} ' \
             '{in_} ' \
-            '--cleanup --keep_names --options ILLUMINA'
+            '--cleanup --keep_names --options ILLUMINA --logfile {logfile_} --max_memory {maxmem_}'
 
 ############################################
 # Pipeline values, dictionaries, and lists #

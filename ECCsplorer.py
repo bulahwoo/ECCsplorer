@@ -670,6 +670,14 @@ def basic_setup(args):
     # max cpus
     config.CPU = args.max_threads
 
+    # Recompute related CPU settings based on final value
+    config.CPU1 = 1
+    config.CPU2 = 2
+    config.CPU4 = 4
+    config.CPU8 = 8
+    config.CPU14 = 14
+    config.CPU30 = 30
+
     return config.REFERENCE_PATH, config.BLASTDB, config.PRJ_NAME, config.IMAGE_TYPE, config.CPU
 
 

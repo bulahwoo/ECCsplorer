@@ -33,6 +33,22 @@ def subp_bedtools_to_arr(window_file, mapping_file):
 
     win_cov_bed = proc.communicate()[0].decode('utf-8')  # binary output to string
 
+    # Create debug filename
+    pid = os.getpid()
+    timestamp = int(time.time() * 1000)  # milliseconds
+    safe_prefix = os.path.basename(mapping_file).replace('.MAPPING', '')
+    debug_filename = f"{safe_prefix}.{pid}.{timestamp}.COVERAGE.debug.txt"
+
+    # Construct debug output directory
+    dir_abs = os.path.abspath(os.path.join(config.CURRENT_DIR, config.PRJ_NAME))
+    debug_dir = os.path.join(dir_abs, config.DIR_TREE['mapping_results'])
+
+    os.makedirs(debug_dir, exist_ok=True)
+    debug_path = os.path.join(debug_dir, debug_filename)
+
+    with open(debug_path, 'w') as debug_file:
+        debug_file.write(win_cov_bed)
+
     win_cov_bed = np.array(list(win_cov_bed.replace('\t', '\n').split('\n')))  # string to array
     win_cov_bed = np.delete(win_cov_bed, -1)  # remove empty cell at the end from last '\n'
 
@@ -150,6 +166,8 @@ def analyze_candidate_region(candidate_key, region_dict, candidate_file_names_di
     get coverage depth of candidate per base for each mapping (summary file)
     """
 
+    DEBUG = True  # Set to False to disable debug file output
+
     print('Analyzing {identifier_} (ProcessID {id_})'
           .format(identifier_=candidate_key, id_=os.getpid()))
 
@@ -229,10 +247,19 @@ def analyze_candidate_region(candidate_key, region_dict, candidate_file_names_di
                 reg_cov_bed = reg_cov_bed.reshape(1, 5)
                 reg_cov_bed = np.append(reg_cov_bed, curr_bed, axis=0)
 
+                if DEBUG:
+                    np.savetxt(os.path.join(dir_out, f'debug_{candidate_key}_pass0.txt'),
+                               reg_cov_bed, delimiter='\t', fmt='%s')
+
             else:
                 header = np.array(['chr', 'start', 'end', 'pos', mapping_dict[all_mappings[i]]])
                 header = header.reshape(1, 5)
                 curr_bed = np.append(header, curr_bed, axis=0)
+
+                if DEBUG:
+                    np.savetxt(os.path.join(dir_out, f'debug_{candidate_key}_pass{i}.txt'),
+                               curr_bed, delimiter='\t', fmt='%s')
+
                 curr_bed = curr_bed[:, -1]
                 curr_bed = curr_bed.reshape((curr_bed.shape[0]), 1)
                 reg_cov_bed = np.append(reg_cov_bed, curr_bed, axis=1)
@@ -354,7 +381,7 @@ class eccMapper:
                             self.maps_readcnt[j] = int(line.replace('\n', ''))
                         if search('bases mapped \(cigar\):', line):
                             line = line.split('\t')[-2]
-                            self.maps_basecnt[j] = int(line.replace('\n', ''))
+                            self.maps_basecnt[j] = float(line.replace('\n', ''))
                         if search('average length:', line):
                             line = line.split('\t')[-1]
                             self.maps_avgreadlength[j] = int(line.replace('\n', ''))
@@ -676,7 +703,7 @@ class eccMapper:
 
             os.system('cd {dir_ref_} && split -n l/{cpu_} -a 2 -d --additional-suffix win{win_}-part.bed {refseq_}'
                       .format(dir_ref_=self.dir_refseq,
-                              cpu_=config.CPU,
+                              cpu_=config.CPU4,
                               win_=self.int_winsize,
                               refseq_=self.bed_refseq_win))
 
@@ -692,7 +719,7 @@ class eccMapper:
                            res_out=self.dir_result,
                            files_name_peak_dict=self.dict_idmaps_peakregion)
 
-            pool = Pool(config.CPU)
+            pool = Pool(config.CPU1)
 
             tuples_coverages = pool.map(func, window_file_parts)  # part info, array with coverage info
 
@@ -722,7 +749,7 @@ class eccMapper:
                                res_out=None,
                                files_name_peak_dict=self.dict_idmaps_peakregion)
 
-                pool = Pool(config.CPU)
+                pool = Pool(config.CPU1)
 
                 tuples_coverages = pool.map(func, window_file_parts)  # part info, array with coverage info
 
@@ -845,7 +872,7 @@ class eccMapper:
             region = bed_ecc_regions
             func = partial(get_overall_coverage, mapping_dict=self.dict_maps_id, region=region)
 
-            pool = Pool(config.CPU)
+            pool = Pool(config.CPU1)
             self.sum_region_coverages = np.array(pool.map(func, self.beds_maps))
             self.sum_region_coverages = np.swapaxes(self.sum_region_coverages, 0, 1)
             self.sum_region_coverages = np.concatenate((self.region_coverage, self.sum_region_coverages), axis=1)
@@ -931,7 +958,7 @@ class eccMapper:
                        all_mappings=self.beds_maps,
                        mapping_dict=self.dict_maps_id)
 
-        pool = Pool(config.CPU)
+        pool = Pool(config.CPU4)
         pool.map(func, self.candidate_list)
         pool.close()
         pool.join()

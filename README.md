@@ -11,7 +11,7 @@ All core functionality remains the same unless noted below. Please refer to the 
 2. Added logging and memory options to RepeatExplorer2 execution in `eccClusterer.py`, enabling automatic creation of a log file (`repex_log.txt`) and control over maximum memory usage (~300 MB).  
 3. Corrected {ggplot2} y-aesthetic usage in `eccDNA_Rcodes.py` to ensure compatibility with {ggplot2} ≥ 3.3.0, improving code readability and aesthetic consistency across plots.  
 4. Added debug logging for coverage calculations in `eccMapper.py` to capture raw per-base coverage data for each region and mapping file. This aids troubleshooting and reproducibility.  
-5. Introduced named CPU constants in `config.py` and applied them in `eccMapper.py` to allow easy adjustment of parallel worker counts, helping prevent system overload and multiprocessing issues.
+5. Defined named CPU constants in `config.py` and integrated them into `eccMapper.py` to avoid system overload and resolve multiprocessing issues.
 
 ---
 
